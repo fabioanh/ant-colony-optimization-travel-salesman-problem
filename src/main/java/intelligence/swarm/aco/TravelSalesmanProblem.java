@@ -23,6 +23,7 @@ public class TravelSalesmanProblem {
 	/**
 	 * instance name
 	 */
+	@SuppressWarnings("unused")
 	private String name;
 	private String edgeWeightType;
 	/**
@@ -62,7 +63,7 @@ public class TravelSalesmanProblem {
 			for (int i = 0; i < n; i++) {
 				processCoordinate(reader.readLine());
 			}
-			distance = computeDistances();
+			setDistance(computeDistances());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -97,7 +98,7 @@ public class TravelSalesmanProblem {
 		Double deltaX = nodes.get(i).getX() - nodes.get(j).getX();
 		Double deltaY = nodes.get(i).getY() - nodes.get(j).getY();
 		Double rij = Math.sqrt(deltaX * deltaX + deltaY * deltaY) / 10.0;
-		Double tij = new Long(rij.longValue()).doubleValue();
+		Double tij = Long.valueOf(rij.longValue()).doubleValue();
 		Long dij;
 		if (tij < rij) {
 			dij = tij.longValue() + 1;
@@ -116,16 +117,16 @@ public class TravelSalesmanProblem {
 		Double y1 = nodes.get(i).getY();
 		Double x2 = nodes.get(j).getX();
 		Double y2 = nodes.get(j).getY();
-		deg = new Long(x1.longValue()).doubleValue();
+		deg = Long.valueOf(x1.longValue()).doubleValue();
 		min = x1 - deg;
 		latI = Math.PI * (deg + 5.0 * min / 3.0) / 180.0;
-		deg = new Long(x2.longValue()).doubleValue();
+		deg = Long.valueOf(x2.longValue()).doubleValue();
 		min = x2 - deg;
 		latJ = Math.PI * (deg + 5.0 * min / 3.0) / 180.0;
-		deg = new Long(y1.longValue()).doubleValue();
+		deg = Long.valueOf(y1.longValue()).doubleValue();
 		min = y1 - deg;
 		longI = Math.PI * (deg + 5.0 * min / 3.0) / 180.0;
-		deg = new Long(y2.longValue()).doubleValue();
+		deg = Long.valueOf(y2.longValue()).doubleValue();
 		min = y2 - deg;
 		longJ = Math.PI * (deg + 5.0 * min / 3.0) / 180.0;
 		q1 = Math.cos(longI - longJ);
@@ -170,6 +171,14 @@ public class TravelSalesmanProblem {
 
 	public Long getSize() {
 		return n;
+	}
+
+	public Long[][] getDistance() {
+		return distance;
+	}
+
+	private void setDistance(Long[][] distance) {
+		this.distance = distance;
 	}
 
 	/**
