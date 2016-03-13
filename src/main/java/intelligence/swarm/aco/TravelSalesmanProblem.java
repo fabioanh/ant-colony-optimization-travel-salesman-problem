@@ -8,7 +8,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.apache.log4j.Logger;
+
 public class TravelSalesmanProblem {
+	private final static Logger LOGGER = Logger.getLogger(TravelSalesmanProblem.class);
 
 	private static final String EUC_2D = "EUC_2D";
 	private static final String ATT = "ATT";
@@ -51,7 +54,19 @@ public class TravelSalesmanProblem {
 								 * i a sorted list of n_near nearest neighbors
 								 */
 
+	public TravelSalesmanProblem(TravelSalesmanProblem tsp) {
+		this.edgeWeightType = tsp.getEdgeWeightType();
+		this.n = tsp.getN();
+		this.name = tsp.getName();
+		this.distance = new Long[n.intValue()][n.intValue()];
+		System.arraycopy(tsp.getDistance(), 0, this.distance, 0, tsp.getDistance().length);
+		this.nodes = new ArrayList<>(tsp.getNodes());
+	}
+
 	public TravelSalesmanProblem(String fileName) {
+
+		LOGGER.debug("Attempt to create TSP");
+
 		BufferedReader reader;
 		nodes = new ArrayList<>();
 		try {
@@ -64,6 +79,9 @@ public class TravelSalesmanProblem {
 				processCoordinate(reader.readLine());
 			}
 			setDistance(computeDistances());
+
+			LOGGER.debug("TSP instance set up properly. Number of cities found: " + n);
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -71,12 +89,12 @@ public class TravelSalesmanProblem {
 
 	private Long[][] computeDistances() {
 		Long[][] dists = new Long[n.intValue()][n.intValue()];
-		for (int i = 0; i < 0; i++) {
-			for (int j = 0; j < 0; j++) {
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
 				dists[i][j] = computeDistance(i, j);
 			}
 		}
-		return null;
+		return dists;
 	}
 
 	private Long computeDistance(int i, int j) {
@@ -179,6 +197,38 @@ public class TravelSalesmanProblem {
 
 	private void setDistance(Long[][] distance) {
 		this.distance = distance;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getEdgeWeightType() {
+		return edgeWeightType;
+	}
+
+	public void setEdgeWeightType(String edgeWeightType) {
+		this.edgeWeightType = edgeWeightType;
+	}
+
+	public Long getN() {
+		return n;
+	}
+
+	public void setN(Long n) {
+		this.n = n;
+	}
+
+	public ArrayList<Point> getNodes() {
+		return nodes;
+	}
+
+	public void setNodes(ArrayList<Point> nodes) {
+		this.nodes = nodes;
 	}
 
 	/**

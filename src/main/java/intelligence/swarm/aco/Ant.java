@@ -3,7 +3,12 @@ package intelligence.swarm.aco;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 public class Ant {
+
+	private final static Logger LOGGER = Logger.getLogger(Ant.class);
+
 	@SuppressWarnings("unused")
 	private Boolean init;
 	/**
@@ -30,6 +35,17 @@ public class Ant {
 		this.setTour(new ArrayList<Long>());
 		this.setVisited(new ArrayList<Long>());
 		init = false;
+	}
+
+	public Ant(Ant ant) {
+		this.init = ant.getInit();
+		this.size = ant.getSize();
+		this.tourLength = ant.getTourLength();
+		this.probability = new Double[size.intValue()][size.intValue()];
+		System.arraycopy(ant.getProbability(), 0, this.probability, 0, ant.getProbability().length);
+		this.tour = new ArrayList<>(ant.getTour());
+		this.visited = new ArrayList<>(ant.getVisited());
+		this.tsp = new TravelSalesmanProblem(ant.getTsp());
 	}
 
 	public Ant(TravelSalesmanProblem tsp, Double[][] probability) {
@@ -102,20 +118,24 @@ public class Ant {
 			tmpSumProbability = 0.0;
 			// Compute the total sum of the probabilities for the current city
 			// used later to normalize the values and get the random next city
-			for (int j = 0; j < size.intValue(); j++) {
-				tmpSumProbability += probability[currentCity.intValue()][j];
+			for (int j = 0; j < size; j++) {
+				if (!visited.contains(Long.valueOf(j))) {
+					tmpSumProbability += probability[currentCity.intValue()][j];
+				}
 			}
 			tmpTotal = tmpSumProbability;
 
 			rnd = RandomUtils.getInstance(seed).getRandom().nextDouble();
 			tmpSumProbability = 0.0;
-			for (int j = 0; j < size.intValue(); j++) {
-				tmpSumProbability += probability[currentCity.intValue()][j] / tmpTotal;
-				if (tmpSumProbability >= rnd) {
-					currentCity = Long.valueOf(j);
-					visited.add(currentCity);
-					tour.add(currentCity);
-					break;
+			for (int j = 0; j < size; j++) {
+				if (!visited.contains(Long.valueOf(j))) {
+					tmpSumProbability += probability[currentCity.intValue()][j] / tmpTotal;
+					if (tmpSumProbability >= rnd) {
+						currentCity = Long.valueOf(j);
+						visited.add(currentCity);
+						tour.add(currentCity);
+						break;
+					}
 				}
 			}
 		}
@@ -155,10 +175,47 @@ public class Ant {
 		this.tour = tour;
 	}
 
+	public Boolean getInit() {
+		return init;
+	}
+
+	public void setInit(Boolean init) {
+		this.init = init;
+	}
+
+	public Double[][] getProbability() {
+		return probability;
+	}
+
+	public void setProbability(Double[][] probability) {
+		this.probability = probability;
+	}
+
+	public TravelSalesmanProblem getTsp() {
+		return tsp;
+	}
+
+	public void setTsp(TravelSalesmanProblem tsp) {
+		this.tsp = tsp;
+	}
+
+	public Long getSize() {
+		return size;
+	}
+
+	public void setSize(Long size) {
+		this.size = size;
+	}
+
+	public void setTourLength(Long tourLength) {
+		this.tourLength = tourLength;
+	}
+
 	public void printTour() {
+		StringBuilder sb = new StringBuilder();
 		for (Long t : tour) {
-			System.out.print(t + " ");
+			sb.append(t + " ");
 		}
-		System.out.println("");
+		LOGGER.info(sb.toString().trim());
 	}
 }

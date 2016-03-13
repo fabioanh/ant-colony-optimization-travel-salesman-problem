@@ -1,12 +1,12 @@
 package intelligence.swarm.aco;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
 public class AntColonyOptimization {
-	final static Logger LOGGER = Logger.getLogger(AntColonyOptimization.class);
-	private static final Long LONG_MAX = (long) 1000;
+	private final static Logger LOGGER = Logger.getLogger(AntColonyOptimization.class);
 
 	private TravelSalesmanProblem tsp;
 	/**
@@ -38,7 +38,7 @@ public class AntColonyOptimization {
 
 	private List<Ant> colony;
 	private Ant bestAnt;
-
+	
 	private AntColonyOptimization(Long maxIterations, Long maxTours, Double alpha, Double beta,
 			Double rho, Long nAnts, Long seed, String instanceFileName) {
 		super();
@@ -66,12 +66,12 @@ public class AntColonyOptimization {
 				ant.search(seed);
 				if (bestTourLength > ant.getTourLength()) {
 					bestTourLength = ant.getTourLength();
+					bestAnt = new Ant(ant);
+					tours++;
 				}
-				bestAnt = ant;
 			}
-			System.out.println("Tour " + tours + " best partial: " + bestAnt.getTourLength());
+			LOGGER.info("Tour #" + tours + " best partial: " + bestAnt.getTourLength());
 			bestAnt.printTour();
-			tours++;
 			evaporatePheromone();
 			depositPheromone();
 			calculateProbability();
@@ -100,7 +100,7 @@ public class AntColonyOptimization {
 	/**
 	 * length of the shortest tour found
 	 */
-	private Long bestTourLength = LONG_MAX;
+	private Long bestTourLength = Long.MAX_VALUE;
 
 	public Long getMaxIterations() {
 		return maxIterations;
@@ -178,16 +178,18 @@ public class AntColonyOptimization {
 	 * Create ants for the colony
 	 */
 	public void createColony() {
-		System.out.println("Creating colony.\n\n");
+		LOGGER.debug("Creating colony.\n\n");
+		colony = new ArrayList<>();
 		for (int i = 0; i < nAnts; i++) {
 			colony.add(new Ant(tsp, pheromone));
 		}
 	}
 
 	public void initializePheromone() {
+		LOGGER.debug("Pheromone Initialization...");
 		pheromone = new Double[tsp.getSize().intValue()][tsp.getSize().intValue()];
-		for (int i = 0; i < tsp.getSize().intValue(); i++) {
-			for (int j = 0; j < tsp.getSize().intValue(); j++) {
+		for (int i = 0; i < tsp.getSize(); i++) {
+			for (int j = 0; j < tsp.getSize(); j++) {
 				pheromone[i][j] = initialPheromone;
 			}
 		}
@@ -195,8 +197,8 @@ public class AntColonyOptimization {
 
 	public void printPheromone() {
 		// TODO: FINISH IMPLEMENTATION. PRINT SOMETHING HERE
-		for (int i = 0; i < tsp.getSize().intValue(); i++) {
-			for (int j = 0; j < tsp.getSize().intValue(); j++) {
+		for (int i = 0; i < tsp.getSize(); i++) {
+			for (int j = 0; j < tsp.getSize(); j++) {
 			}
 		}
 	}
@@ -206,8 +208,8 @@ public class AntColonyOptimization {
 	 */
 	public void initializeHeuristic() {
 		heuristic = new Double[this.tsp.getSize().intValue()][this.tsp.getSize().intValue()];
-		for (int i = 0; i < tsp.getSize().intValue(); i++) {
-			for (int j = 0; j < tsp.getSize().intValue(); j++) {
+		for (int i = 0; i < tsp.getSize(); i++) {
+			for (int j = 0; j < tsp.getSize(); j++) {
 				heuristic[i][j] = 1.0 / tsp.getDistance()[i][j];
 			}
 		}
@@ -219,8 +221,8 @@ public class AntColonyOptimization {
 	 */
 	public void calculateProbability() {
 		probability = new Double[this.tsp.getSize().intValue()][this.tsp.getSize().intValue()];
-		for (int i = 0; i < tsp.getSize().intValue(); i++) {
-			for (int j = 0; j < tsp.getSize().intValue(); j++) {
+		for (int i = 0; i < tsp.getSize(); i++) {
+			for (int j = 0; j < tsp.getSize(); j++) {
 				Double numerator = Math.pow(pheromone[i][j], alpha)
 						* Math.pow(heuristic[i][j], beta);
 				Double denominator = sumPheromoneHeuristic(i);
@@ -237,7 +239,7 @@ public class AntColonyOptimization {
 	 */
 	private Double sumPheromoneHeuristic(int idx) {
 		Double sum = 0.0;
-		for (int j = 0; j < tsp.getSize().intValue(); j++) {
+		for (int j = 0; j < tsp.getSize(); j++) {
 			sum += Math.pow(pheromone[idx][j], alpha) * Math.pow(heuristic[idx][j], beta);
 		}
 		return sum;
@@ -247,8 +249,8 @@ public class AntColonyOptimization {
 	 * Pheromone evaporation
 	 */
 	public void evaporatePheromone() {
-		for (int i = 0; i < tsp.getSize().intValue(); i++) {
-			for (int j = i; j < tsp.getSize().intValue(); j++) {
+		for (int i = 0; i < tsp.getSize(); i++) {
+			for (int j = i; j < tsp.getSize(); j++) {
 				pheromone[i][j] = (1.0 - rho) * pheromone[i][j];
 				pheromone[j][i] = pheromone[i][j];
 			}
@@ -261,8 +263,8 @@ public class AntColonyOptimization {
 	public void depositPheromoneAlt() {
 		Double[][] updatedPheromone = new Double[tsp.getSize().intValue()][tsp.getSize()
 				.intValue()];
-		for (int i = 0; i < tsp.getSize().intValue(); i++) {
-			for (int j = 0; j < tsp.getSize().intValue(); j++) {
+		for (int i = 0; i < tsp.getSize(); i++) {
+			for (int j = 0; j < tsp.getSize(); j++) {
 				updatedPheromone[i][j] = (1.0 - rho) * pheromone[i][j]
 						+ edgePheromoneChange(Long.valueOf(i), Long.valueOf(j));
 			}
